@@ -70,22 +70,22 @@ def download_announcements(course_id):
     if response.status_code == 200:
         announcements = response.json()
 
-        # Generate HTML content
-        html_content = "<html><body>"
-        for announcement in announcements:
-            html_content += f"<h2>{announcement['title']}</h2>"
-            html_content += f"<p>{announcement['message']}</p>"
-        html_content += "</body></html>"
-
         # Write HTML content to a file
         directory = f'_data/course-{course_id}/announcements/'
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        filepath = os.path.join(directory, "announcements.html")
+        # Generate HTML content
+        for announcement in announcements:
+            html_content = "<html><body>"
+            filepath = os.path.join(directory, f"announcement-{announcement['posted_at']}.html")
+            html_content += f"<h2>{announcement['title']}</h2>"
+            html_content += f"<p>{announcement['message']}</p>"
+            html_content += "</body></html>"
 
-        with open(filepath, "w") as html_file:
-            html_file.write(html_content)
+            with open(filepath, "w") as html_file:
+                html_file.write(html_content)
+    
 
         print("Announcements saved to announcements.html.")
 
@@ -108,3 +108,6 @@ def download_course(course_id):
     download_announcements(course_id)
 
     print("Finished downloading course data for course id: " + str(course_id) + ".")
+
+
+download_course(272942)

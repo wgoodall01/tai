@@ -4,10 +4,11 @@ version = "0.1.0"
 description = ""
 authors = ["William Goodall <wgoodall01@gmail.com>"]
 readme = "README.md"
+packages = [{include = "tai_index"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-
+ipykernel = "^6.25.2"
 
 [build-system]
 requires = ["poetry-core"]

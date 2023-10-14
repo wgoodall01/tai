@@ -46,12 +46,13 @@ def download_files(course_id):
         # Iterate through files in files
         for file in files:
 
-            print("Downloading: " + file['display_name'] + "...")
-            
             # Set up API request for file
             filepath = os.path.join(directory, file['display_name'])
             if not os.path.exists(filepath):
+                print("Downloading: " + file['display_name'] + "...")
                 urllib.request.urlretrieve(file['url'], filepath)
+            else:
+                print("File already exists: " + file['display_name'] + ". Skipping...")    
 
 def download_announcements(course_id):
     """Downloads all announcements from a specified course id.

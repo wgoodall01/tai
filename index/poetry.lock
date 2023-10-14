@@ -651,20 +651,6 @@ files = [
 ]
 
 [[package]]
-name = "dotenvy"
-version = "0.2.0"
-description = "Dotenv handler for Python"
-optional = false
-python-versions = "*"
-files = [
-    {file = "dotenvy-0.2.0-py2.py3-none-any.whl", hash = "sha256:06f496373cb7f67e746f1a73896da2a4562c231a42c9d61825d2a304e5073d19"},
-    {file = "dotenvy-0.2.0.tar.gz", hash = "sha256:d2f28647834e9e5dcf410562bc123d22101cdc4008e14174a9a40357369e0a05"},
-]
-
-[package.dependencies]
-future = "*"
-
-[[package]]
 name = "executing"
 version = "2.0.0"
 description = "Get the currently executing AST node of a frame, and other information"
@@ -823,16 +809,6 @@ sftp = ["paramiko"]
 smb = ["smbprotocol"]
 ssh = ["paramiko"]
 tqdm = ["tqdm"]
-
-[[package]]
-name = "future"
-version = "0.18.3"
-description = "Clean single-source support for Python 3 and 2"
-optional = false
-python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
-files = [
-    {file = "future-0.18.3.tar.gz", hash = "sha256:34a17436ed1e96697a86f9de3d15a3b0be01d8bc8de9c1dffd59fb8234ed5307"},
-]
 
 [[package]]
 name = "greenlet"
@@ -2611,6 +2587,20 @@ files = [
 six = ">=1.5"
 
 [[package]]
+name = "python-dotenv"
+version = "1.0.0"
+description = "Read key-value pairs from a .env file and set them as environment variables"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "python-dotenv-1.0.0.tar.gz", hash = "sha256:a8df96034aae6d2d50a4ebe8216326c61c3eb64836776504fcca410e5937a3ba"},
+    {file = "python_dotenv-1.0.0-py3-none-any.whl", hash = "sha256:f5971a9226b701070a4bf2c38c89e5a3f0d64de8debda981d1db98583009122a"},
+]
+
+[package.extras]
+cli = ["click (>=5.0)"]
+
+[[package]]
 name = "python-json-logger"
 version = "2.0.7"
 description = "A python library adding a json log formatter"
@@ -4065,4 +4055,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.12"
-content-hash = "b21aa0e6a013849185b0987ddfd5ff4b2b8ff11c28949e91aeebe0b45b33a2a8"
+content-hash = "bebc9202a5478b0c73691a2ea55207ba1486af7c88a8c98c0b755ba9e2a7aec5"

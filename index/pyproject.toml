@@ -20,6 +20,7 @@ ipywidgets = "^8.1.1"
 tqdm = "^4.66.1"
 pillow = ">=3.3.2,<=9.5.0"
 python-dotenv = "^1.0.0"
+pymongo = "^4.5.0"
 
 [build-system]
 requires = ["poetry-core"]

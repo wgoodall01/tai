@@ -135,6 +135,10 @@ def download_assignment(course_id, assignment):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
+    if assignment['locked_for_user']:
+        print("Skipping locked assignment: " + str(assignment['name']) + "...")
+        return
+
     html_content = "<html><body>"
     filepath = os.path.join(directory, f"assignment-{assignment['id']}.html")
     html_content += f"<h2>{assignment['name']}</h2>"
@@ -147,6 +151,56 @@ def download_assignment(course_id, assignment):
 
     with open(filepath, "w") as html_file:
         html_file.write(html_content)
+
+def download_quizzes(course_id):
+    """Downloads all quizzes from a specified course id.
+    Downloads to a directory named _data/course-{course_id}/quizzes/
+    """
+
+    # Set the API endpoint for retrieving module items
+    endpoint = f'{canvas_url}/courses/{course_id}/quizzes'
+
+    # Create the request headers with the access token
+    headers = {
+        'Authorization': f'Bearer {canvas_token}'
+    }
+
+    # Send a GET request to retrieve the module items
+    response = requests.get(endpoint, headers=headers)
+
+    # Check if the request was successful
+    if response.status_code == 200:
+        # Extract the module items from the response
+        quizzes = response.json()
+        # Iterate over the module items
+        for quiz in quizzes:
+            download_quiz(course_id, quiz)
+
+    else:
+        # Print an error message if the request was unsuccessful
+        print(f"Failed to retrieve quizzes. Error: {response.status_code}")
+
+def download_quiz(course_id, quiz):
+    # Write HTML content to a file
+    directory = f'_data/course-{course_id}/assignments/'
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    if quiz['locked_for_user']:
+        print("Skipping locked quiz: " + str(quiz['title']) + "...")
+        return
+
+    html_content = "<html><body>"
+    filepath = os.path.join(directory, f"quiz-{quiz['title']}.html")
+    html_content += f"<h2>{quiz['title']}</h2>"
+    html_content += f"<p> {quiz['description']}</p>"
+    html_content += f"<p>Due at: {quiz['due_at']}</p>"
+    html_content += "</body></html>"
+    print("Downloading: " + str(quiz['title']) + "...")
+
+    with open(filepath, "w") as html_file:
+        html_file.write(html_content)
+
 def download_homepage(course_id):
     """Downloads the homepage from a specified course id.
     Downloads to a directory named _data/course-{course_id}/homepage/
@@ -223,13 +277,17 @@ def download_page(course_id, page):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
+    if page['locked_for_user']:
+        print("Skipping locked page: " + str(page['url']) + "...")
+        return
+
     html_content = "<html><body>"
-    filepath = os.path.join(directory, f"page-{page['id']}.html")
+    filepath = os.path.join(directory, f"page-{page['url']}.html")
     html_content += f"<h2>{page['title']}</h2>"
     html_content += f"<p> {page['body']}</p>"
     html_content += "</body></html>"
 
-    print("Downloading: " + str(page['id']) + "...")
+    print("Downloading: " + str(page['url']) + "...")
 
     with open(filepath, "w") as html_file:
         html_file.write(html_content)
@@ -247,45 +305,74 @@ def download_modules(course_id):
         'Authorization': f'Bearer {canvas_token}'
     }
 
-    # Send a GET request to retrieve the module items
-    response = requests.get(endpoint, headers=headers)
+    while(endpoint):
 
-    # Check if the request was successful
-    if response.status_code == 200:
-        # Extract the module items from the response
-        modules = response.json()
+        modules_response = requests.get(endpoint, headers=headers)
+
+        # Break if this is not a link
+        if not 'Link' in modules_response.headers:
+            break
+
+        # More breaking
+        links = requests.utils.parse_header_links(modules_response.headers['Link'].rstrip('>').replace('>,<', ',<'))
+        endpoint = None
+        for link in links:
+            if link['rel'] == 'next':
+                endpoint = link['url']
+                break
+
+        # Get list of files
+        modules = modules_response.json()
+        
         # Iterate over the module items
         for module in modules:
 
-            items_response = requests.get(module['items_url'], headers=headers)
-            
-            if response.status_code != 200:
-                continue
+            items_url = module['items_url']
 
-            module_items = items_response.json()
+            while(items_url):
 
-            for module_item in module_items:
-                item_url = module_item['url']
-                # # Retrieve the details of each module item
-                # module_item_id = module_item['id']
-                # module_item_title = module_item['title']
-                # module_item_type = module_item['type']
+                items_response = requests.get(items_url, headers=headers)
 
-                # if(module_item_type == 'Page'):
-                #     download_page(course_id, module_item)
-                # elif(module_item_type == 'File'):
-                #     download_file(course_id, module_item)
-                # elif(module_item_type == 'Assignment'):
-                #     download_assignment(course_id, module_item)
-                # else:
-                #     print("Unsupported type: " + module_item_type + ". Skipping " + module_item_title + "...")
-                # Print the details of the module item
-                print(f"Module Url: {item_url}")
+                # Break if this is not a link
+                if not 'Link' in items_response.headers:
+                    break
 
-    else:
-        # Print an error message if the request was unsuccessful
-        print(f"Failed to retrieve module items. Error: {response.status_code}")
+                # More breaking
+                links = requests.utils.parse_header_links(items_response.headers['Link'].rstrip('>').replace('>,<', ',<'))
+                items_url = None
+                for link in links:
+                    if link['rel'] == 'next':
+                        items_url = link['url']
+                        break
 
+                # Get list of files
+                module_items = items_response.json()
+
+                for module_item in module_items:
+
+                    item_type = module_item['type']
+                    if (item_type == 'ExternalUrl'):
+                        print("Unsupported type: " + item_type + ". Skipping...")
+                        continue
+
+                    response = requests.get(module_item['url'], headers=headers)
+                    if response.status_code != 200:
+                        continue
+
+                    item = response.json()
+
+                    # # Retrieve the details of each module item
+                    if(item_type == 'Page'):
+                        download_page(course_id, item)
+                        continue
+                    elif(item_type == 'File'):
+                        download_file(course_id, item)
+                    elif(item_type == 'Assignment'):
+                        download_assignment(course_id, item)
+                    elif(item_type == 'Quiz'):
+                        download_quiz(course_id, item)
+                    else:
+                        print("Unsupported type: " + item_type + ". Skipping...")
 
 def download_course(course_id):
     """Downloads all relevant information for a course.
@@ -304,14 +391,16 @@ def download_course(course_id):
     print("Downloading assignments...")
     download_assignments(course_id)
 
+    print("Downloading quizzes...")
+    download_quizzes(course_id)
+
     print("Downloading homepage...")
     download_homepage(course_id)
 
     print("Downloading syllabus...")
     download_syllabus(course_id)
 
-    # print("Downloading modules...")
-    # download_modules(course_id)
+    print("Downloading modules...")
+    download_modules(course_id)
 
     print("Finished downloading course data for course id: " + str(course_id) + ".")
-

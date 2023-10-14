@@ -1,0 +1,42 @@
+/* Font Imports */
+@font-face {
+    font-family: "Montreal-Neue";
+    font-weight: 300;
+    font-style: normal;
+    src: url('../../public/fonts/PPNeueMontrealMono-Thin.woff') format('woff');
+  }
+  
+  @font-face {
+    font-family: "Montreal-Neue";
+    font-weight: 400;
+    font-style: italic;
+    src: url('../../public/fonts/PPNeueMontrealMono-RegularItalic.woff') format('woff');
+  }
+  
+  @font-face {
+    font-family: "Montreal-Neue";
+    font-weight: 400;
+    font-style: normal;
+    src: url('../../public/fonts/PPNeueMontrealMono-Medium.woff') format('woff');
+  }
+  
+  @font-face {
+    font-family: "Montreal-Neue";
+    font-weight: 500;
+    font-style: normal;
+    src: url('../../public/fonts/PPNeueMontrealMono-Book.woff') format('woff');
+  }
+  
+  @font-face {
+    font-family: "Montreal-Neue";
+    font-weight: 600;
+    font-style: normal;
+    src: url('../../public/fonts/PPNeueMontrealMono-Bold.woff') format('woff');
+  }
+  
+  @font-face {
+    font-family: "Montreal-Neue";
+    font-weight: 600;
+    font-style: italic;
+    src: url('../../public/fonts/PPNeueMontrealMono-BoldItalic.woff') format('woff');
+  }

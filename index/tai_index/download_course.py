@@ -78,20 +78,60 @@ def download_announcements(course_id):
         # Generate HTML content
         for announcement in announcements:
             html_content = "<html><body>"
-            filepath = os.path.join(directory, f"announcement-{announcement['posted_at']}.html")
+            filepath = os.path.join(directory, f"announcement-{announcement['id']}.html")
             html_content += f"<h2>{announcement['title']}</h2>"
+            html_content += f"<p> Posted at: {announcement['posted_at']}</p>"
             html_content += f"<p>{announcement['message']}</p>"
             html_content += "</body></html>"
 
+            print("Downloading: " + str(announcement['id']) + "...")
+
             with open(filepath, "w") as html_file:
                 html_file.write(html_content)
-    
-
-        print("Announcements saved to announcements.html.")
 
     else:
 
         print(f"Error fetching announcements. Status code: {response.status_code}")
+
+def download_assignments(course_id):
+    """Downloads all assignments from a specified course id.
+    Downloads to a directory named _data/course-{course_id}/assignments/
+    """
+
+    # Define the API endpoint for assignments
+    assignments_url = f'{canvas_url}/courses/{course_id}/assignments'
+
+    # Set up the headers with the authorization token
+    headers = {"Authorization": f"Bearer {canvas_token}"}
+
+    # Make the API request to get assignments
+    response = requests.get(assignments_url, headers=headers)
+    if response.status_code == 200:
+        assignments = response.json()
+
+        # Write HTML content to a file
+        directory = f'_data/course-{course_id}/assignments/'
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        # Generate HTML content
+        for assignment in assignments:
+            html_content = "<html><body>"
+            filepath = os.path.join(directory, f"assignment-{assignment['id']}.html")
+            html_content += f"<h2>{assignment['name']}</h2>"
+            html_content += f"<p> Due at: {assignment['due_at']}</p>"
+            html_content += f"<p> Created at: {assignment['created_at']}</p>"
+            html_content += f"<p> Description: {assignment['description']}</p>"
+            html_content += "</body></html>"
+
+            print("Downloading: " + str(assignment['id']) + "...")
+
+            with open(filepath, "w") as html_file:
+                html_file.write(html_content)
+
+    else:
+
+        print(f"Error fetching assignments. Status code: {response.status_code}")
 
 def download_course(course_id):
     """Downloads all relevant information for a course.
@@ -106,6 +146,9 @@ def download_course(course_id):
 
     print("Downloading announcements...")
     download_announcements(course_id)
+
+    print("Downloading assignments...")
+    download_assignments(course_id)
 
     print("Finished downloading course data for course id: " + str(course_id) + ".")
 

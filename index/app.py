@@ -9,7 +9,12 @@ from llama_index.node_parser import SimpleNodeParser, SentenceWindowNodeParser
 from llama_index.llms import OpenAI
 from llama_index.embeddings import OpenAIEmbedding
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    static_folder="../app/out",
+    static_url_path="",
+)
+cors = CORS(app)
 
 if __name__ != "__main__":
     gunicorn_logger = logging.getLogger("gunicorn.error")
@@ -32,9 +37,6 @@ index = load_index_from_storage(storage_context)
 
 app.logger.info("index: done loading")
 
-# Serve static files from ../app/out
-app.static_folder = "../app/out"
-cors = CORS(app)
 
 @app.route("/answer", methods=["POST"])
 def answer():
@@ -74,3 +76,9 @@ def answer():
             for i, cit in enumerate(response.source_nodes)
         ],
     }
+
+
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def catch_all(path):
+    return app.send_static_file("index.html")

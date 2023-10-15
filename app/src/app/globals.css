@@ -9,6 +9,7 @@
   --input-bg: 255, 255, 255;
   --input-shadow: 0px 0px 20px rgba(255, 255, 255, 0.3);
   --glass-shadow: 0px 0px 20px rgba(255, 255, 255, 0.3);
+  --link-highlight: rgb(171, 45, 110);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,6 +20,7 @@
     --input-bg: 0, 0, 0;
     --input-shadow: 0px 0px 20px rgba(0, 0, 0, 0.3);
     --glass-shadow: 0px 0px 20px rgba(0, 0, 0, 0.3);
+    --link-highlight: rgb(228, 137, 184);
   }
 }
 
@@ -70,4 +72,8 @@ h2 {
 .disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.link:hover {
+  color: var(--link-highlight);
 }

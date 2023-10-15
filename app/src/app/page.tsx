@@ -3,6 +3,7 @@
 import { useState } from "react";
 import "swiper/css";
 import axios from "axios";
+import { stat } from "fs";
 
 enum Status {
   START,
@@ -14,6 +15,8 @@ type Reference = {
   citation_no: number,
   course_id: string,
   file_name: string,
+  link: string,
+  name: string,
   page_number: string,
   source_window: string
 }
@@ -56,12 +59,9 @@ export default function Home() {
         question: question,
         response: response.data
       }
-
-      // prepare to answer new question
       setPromptAnswers([newEntry, ...promptAnswers]);
       setCanAsk(true);
       setQuestion('');
-
   })
   
   }
@@ -85,7 +85,7 @@ export default function Home() {
       case Status.START:
         return (
           <>
-            <h1 className="text-[52px] font-bold italic">Hi I'm Tai!</h1>
+            <h1 className="text-[52px] font-bold italic">Hi, I'm Tai!</h1>
             <p className="text-[24px] font-medium">
               Your own personalized Teaching Assistant AI
             </p>
@@ -159,7 +159,12 @@ export default function Home() {
                       answer?.response.citations.map((ref) => {
                         return(
                           <p className="text-[14px] font-thin">
-                            {'[' + ref.citation_no + '] '} {ref.file_name} {ref.page_number && ("| Page " + ref.page_number)}
+                            {'[' + ref.citation_no + '] '} {
+                           ref.link ? 
+                            <a className="underline link" href={ref.link}>
+                              {ref.name}
+                            </a> : ref.name
+                            } {ref.page_number && ("| Page " + ref.page_number)}
                           </p>
                         )
                       })
@@ -169,9 +174,10 @@ export default function Home() {
               )
             })
           }
+        <span className="text-center !justify-self-end font-light">While these results are a good first step, the information returned by the language model may not be completely accurate. Make sure to read the source material yourself.</span>
           </>
         );
-    }
+      }
   };
 
   return (
@@ -202,6 +208,7 @@ export default function Home() {
           </p>
         </div>
       )}
+
     </main>
   );
 }

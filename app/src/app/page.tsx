@@ -10,12 +10,29 @@ enum Status {
   PROMPTING,
 }
 
+type Reference = {
+  citation_no: number,
+  course_id: string,
+  file_name: string,
+  page_number: string,
+  source_window: string
+}
+
+type PromptAnswer = {
+  question: string,
+  response: {
+    answer: string,
+    citations: Reference[]
+  }
+}
+
 export default function Home() {
   const [courseId, setCourseId] = useState(-1);
   const [status, setStatus] = useState(Status.START);
   const [courseButtonEnabled, setCourseButtonEnabled] = useState(false);
-  const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState("");
+  const [question, setQuestion] = useState('');
+  const [answer, setAnswer] = useState<PromptAnswer>();
+  const [canAsk, setCanAsk] = useState(true);
 
   const getAnswer = async () => {
     const headers = {
@@ -27,12 +44,22 @@ export default function Home() {
       question: question,
     };
 
-    console.log(body);
+    setCanAsk(false);
 
-    axios.post("/answer", body, { headers }).then((response) => {
-      setAnswer(response.data.answer);
-    });
-  };
+    axios.post('/answer',
+    body,
+    {headers},
+    ).then((response) => {
+      const newEntry : PromptAnswer = {
+        question: question,
+        response: response.data
+      }
+      setAnswer(newEntry);
+      console.log(answer);
+      setCanAsk(true);
+  })
+  
+  }
 
   const detectCourseId = (courseLink: string) => {
     const courseNumber = courseLink.split("/");
@@ -110,16 +137,29 @@ export default function Home() {
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
             />
-            {answer !== "" && (
-              <div className="glass !w-full mb-3">
-                <p className="text-[16px] font-medium">{answer}</p>
-                <p className="text-[14px] font-thin">references go here</p>
-              </div>
-            )}
+              {answer != undefined && 
+            <div className="glass !w-full mb-3">
+              <p className='text-[16px] font-bold mb-2'> 
+                {answer?.question}
+              </p>
+              <p className='text-[16px] font-medium mb-2'> 
+                {answer?.response.answer}
+              </p>
+              <p className="text-[14px] font-thin">
+                {
+                  answer?.response.citations.map((ref) => {
+                    return(
+                      <p className="text-[14px] font-thin">
+                        {'[' + ref.citation_no + '] '} {ref.file_name} {ref.page_number && ("| Page " + ref.page_number)}
+                      </p>
+                    )
+                  })
+                }
+              </p>
+            </div>
+            }
             <div className="w-full flex justify-end">
-              <span className="button" onClick={() => getAnswer()}>
-                Ask
-              </span>
+              <span className={"button " + (!canAsk && "disabled")} onClick={() => canAsk && getAnswer()}>Ask</span>
             </div>
           </>
         );

@@ -393,7 +393,7 @@ def download_modules(course_id):
 
 def create_source_dict(course_id):
     """Creates a dictionary of all the source files for a course.
-    """
+    """   
     global si_dict
 
     # This is gross but it works
@@ -449,10 +449,3 @@ def download_course(course_id):
     create_source_dict(course_id)
 
     print("Finished downloading course data for course id: " + str(course_id) + ".")
-
-download_course(324194)
-download_course(352034)
-download_course(334454)
-download_course(118080)
-download_course(91004)
-download_course(137180)

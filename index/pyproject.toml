@@ -23,6 +23,7 @@ python-dotenv = "^1.0.0"
 pymongo = "^4.5.0"
 flask = "^3.0.0"
 flask-sock = "^0.7.0"
+gunicorn = "^21.2.0"
 
 [build-system]
 requires = ["poetry-core"]

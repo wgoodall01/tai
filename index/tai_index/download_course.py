@@ -2,12 +2,14 @@ import os
 import requests
 from dotenv import load_dotenv
 import urllib.request
+import json
 
 # Import the environment variables
 load_dotenv()
 canvas_token = os.getenv('CANVAS_TOKEN')
 canvas_url = os.getenv('CANVAS_URL')
 
+si_dict = {}
 
 def download_files(course_id):
     """Downloads all files from a specified course id.
@@ -56,9 +58,12 @@ def download_file(course_id, file):
 
     # Set up API request for file
     filepath = os.path.join(directory, file['display_name'])
+    append_source_dict(filepath, f"https://gatech.instructure.com/courses/{course_id}/files?preview={file['id']}", os.path.splitext(file['display_name'])[0])
+
     if not os.path.exists(filepath):
         print("Downloading: " + file['display_name'] + "...")
         urllib.request.urlretrieve(file['url'], filepath)
+
     else:
         print("File already exists: " + file['display_name'] + ". Skipping...")  
 
@@ -103,6 +108,8 @@ def download_announcement(course_id, announcement):
 
     with open(filepath, "w") as html_file:
         html_file.write(html_content)
+    
+    append_source_dict(filepath, announcement['url'], announcement['title'])
 
 def download_assignments(course_id):
     """Downloads all assignments from a specified course id.
@@ -151,6 +158,8 @@ def download_assignment(course_id, assignment):
 
     with open(filepath, "w") as html_file:
         html_file.write(html_content)
+
+    append_source_dict(filepath, assignment['html_url'], assignment['name'])
 
 def download_quizzes(course_id):
     """Downloads all quizzes from a specified course id.
@@ -232,6 +241,8 @@ def download_homepage(course_id):
         with open(filepath, "w") as html_file:
             html_file.write(html_content)
 
+        append_source_dict(filepath, f'https://gatech.instructure.com/courses/{course_id}', "Canvas Homepage")
+
     else:
 
         print(f"Error fetching homepage. Status code: {response.status_code}")
@@ -267,6 +278,9 @@ def download_syllabus(course_id):
         with open(filepath, "w") as html_file:
             html_file.write(html_content)
 
+        # TODO: Fix this to not be statically set to gatech domain
+        append_source_dict(filepath, f'https://gatech.instructure.com/courses/{course_id}', "Canvas Syllabus")
+
     else:
 
         print(f"Error fetching syllabus. Status code: {response.status_code}")
@@ -291,6 +305,8 @@ def download_page(course_id, page):
 
     with open(filepath, "w") as html_file:
         html_file.write(html_content)
+
+    append_source_dict(filepath, f"https://gatech.instructure.com/courses/{course_id}/pages/{page['url']}", page['title'])
 
 def download_modules(course_id):
     """Downloads all modules from a specified course id.
@@ -374,11 +390,36 @@ def download_modules(course_id):
                     else:
                         print("Unsupported type: " + item_type + ". Skipping...")
 
+def create_source_dict(course_id):
+    """Creates a dictionary of all the source files for a course.
+    """
+    global si_dict
+
+    # This is gross but it works
+    directory = f'_data/course-{course_id}/'
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    filepath = os.path.join(directory, 'source_index.json')
+
+    with open(filepath, 'w') as file:
+        file.write(json.dumps(si_dict))
+
+def append_source_dict(source_file, source_link, name):
+    """Appends a source file to the source dictionary.
+    """
+    # This is gross but it works
+    si_dict[source_file] = {'name': name, 'link': source_link}
+
 def download_course(course_id):
     """Downloads all relevant information for a course.
     Currently: files and announcements.
     Downloads to a directory named _data/course-{course_id}/
     """
+
+    print("Creating source index dict...")
+    global si_dict
+    si_dict = {}
 
     print("Downloading course data for course id: " + str(course_id) + "...")
 
@@ -403,4 +444,9 @@ def download_course(course_id):
     print("Downloading modules...")
     download_modules(course_id)
 
+    print("Creating source index dict...")
+    create_source_dict(course_id)
+
     print("Finished downloading course data for course id: " + str(course_id) + ".")
+
+download_course(352034)

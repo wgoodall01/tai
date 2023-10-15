@@ -51,7 +51,7 @@ def download_file(course_id, file):
         os.makedirs(directory)
 
     # Skip video and picture files
-    extensions_to_skip = ['.mp4', '.mov', '.avi', '.mkv', '.jpg', '.jpeg', '.png', '.gif', '.zip', '.m4v']
+    extensions_to_skip = ['.mp4', '.mov', '.avi', '.mkv', '.jpg', '.jpeg', '.png', '.gif', '.zip', '.m4v', '.zoom', '.tmp']
     if any(file['display_name'].lower().endswith(ext) for ext in extensions_to_skip):
         print("Skipping: " + file['display_name'] + "...")
         return
@@ -210,6 +210,8 @@ def download_quiz(course_id, quiz):
     with open(filepath, "w") as html_file:
         html_file.write(html_content)
 
+    append_source_dict(filepath, f"https://gatech.instructure.com/courses/{course_id}/quizzes/{quiz['id']}", quiz['title'])
+
 def download_homepage(course_id):
     """Downloads the homepage from a specified course id.
     Downloads to a directory named _data/course-{course_id}/homepage/
@@ -367,10 +369,10 @@ def download_modules(course_id):
                 for module_item in module_items:
 
                     item_type = module_item['type']
-                    if (item_type == 'ExternalUrl'):
+                    if item_type not in ['Page', 'File', 'Assignment', 'Quiz']:
                         print("Unsupported type: " + item_type + ". Skipping...")
                         continue
-
+                    
                     response = requests.get(module_item['url'], headers=headers)
                     if response.status_code != 200:
                         continue
@@ -380,7 +382,6 @@ def download_modules(course_id):
                     # # Retrieve the details of each module item
                     if(item_type == 'Page'):
                         download_page(course_id, item)
-                        continue
                     elif(item_type == 'File'):
                         download_file(course_id, item)
                     elif(item_type == 'Assignment'):
@@ -449,4 +450,9 @@ def download_course(course_id):
 
     print("Finished downloading course data for course id: " + str(course_id) + ".")
 
+download_course(324194)
 download_course(352034)
+download_course(334454)
+download_course(118080)
+download_course(91004)
+download_course(137180)

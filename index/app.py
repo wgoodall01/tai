@@ -68,10 +68,12 @@ def answer():
         "citations": [
             {
                 "citation_no": i + 1,
-                "file_name": cit.metadata["file_name"],
                 "course_id": cit.metadata["course_id"],
-                "page_number": cit.metadata["page_label"],
-                "source_window": cit.metadata["window"],
+                "file_name": cit.metadata.get("file_name", None),
+                "page_number": cit.metadata.get("page_label", None),
+                "source_window": cit.metadata.get("window", None),
+                "name": cit.metadata.get("name", None),
+                "link": cit.metadata.get("link", None),
             }
             for i, cit in enumerate(response.source_nodes)
         ],

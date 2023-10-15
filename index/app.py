@@ -4,6 +4,7 @@ import logging
 from llama_index import StorageContext, ServiceContext, load_index_from_storage
 from llama_index.query_engine import CitationQueryEngine
 from llama_index.vector_stores.types import ExactMatchFilter, MetadataFilters
+from flask_cors import CORS
 from llama_index.node_parser import SimpleNodeParser, SentenceWindowNodeParser
 from llama_index.llms import OpenAI
 from llama_index.embeddings import OpenAIEmbedding
@@ -33,7 +34,7 @@ app.logger.info("index: done loading")
 
 # Serve static files from ../app/out
 app.static_folder = "../app/out"
-
+cors = CORS(app)
 
 @app.route("/answer", methods=["POST"])
 def answer():

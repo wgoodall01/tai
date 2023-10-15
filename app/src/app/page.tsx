@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import 'swiper/css';
+import axios from 'axios';
 
 enum Status {
   START,
@@ -15,6 +16,27 @@ export default function Home() {
   const [status, setStatus] = useState(Status.START);
   const [courseButtonEnabled, setCourseButtonEnabled] = useState(false);
   const [question, setQuestion] = useState('');
+  const [answer, setAnswer] = useState('');
+
+  const getAnswer = async () => {
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+
+    const body = {
+      course_ids: [courseId.toString()],
+      question: question
+    };
+
+    console.log(body)
+
+    axios.post('http://localhost:2500/answer',
+    body,
+    {headers},
+    ).then((response) => {
+      setAnswer(response.data.answer);
+  })
+  }
 
   const detectCourseId = (courseLink : string) => {
     const courseNumber = courseLink.split('/');
@@ -29,6 +51,7 @@ export default function Home() {
       }
     }
   }
+
 
   const boxContents = () => {
     switch(status) {
@@ -82,6 +105,19 @@ export default function Home() {
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             />
+              {answer !== '' && 
+            <div className="glass !w-full mb-3">
+              <p className='text-[16px] font-medium'> 
+                {answer}
+              </p>
+              <p className="text-[14px] font-thin">
+                references go here
+              </p>
+            </div>
+            }
+            <div className="w-full flex justify-end">
+              <span className="button" onClick={() => getAnswer()}>Ask</span>
+            </div>
           </>
         )
     }
